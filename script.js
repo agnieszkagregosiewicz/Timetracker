@@ -49,13 +49,16 @@ function renderTask(tasks) {
                 finishButton.addEventListener('click', function(e) {
                     e.preventDefault();
                     let status = 'closed';
-                    const openClas = document.querySelector('.js-task-open-only');
-                    openClas.remove();
                     apiUpdateTask(taskId, title, description, status).then(
                         function(resp) {
-                            apiListTasks();
+                            //apiListTasks();
                         }
                     )
+                    const openClass = document.querySelectorAll('.js-task-open-only');
+                    console.log(openClass);
+                    for (const element of openClass) {
+                        element.remove()
+                    }
                 })
             }
             const deleteButton = document.createElement('button');
@@ -77,10 +80,10 @@ function renderTask(tasks) {
             })
             if (status === 'open') {
                 const addOperationForm = document.createElement('div');
-                addOperationForm.className = 'card-body';
+                addOperationForm.className = 'card-body js-task-open-only';
                 addOperationForm.innerHTML = '<form>\n' +
                     '<div class="input-group">\n' +
-                    '<input type="text" id="op' + taskId +'"  placeholder="Operation description" class="form-control" class="js-task-open-only" minlength="5">\n' +
+                    '<input type="text" id="op' + taskId +'"  placeholder="Operation description" class="form-control" minlength="5">\n' +
                     '<div class="input-group-append">\n' +
                     '<button class="btn btn-info">Add</button>\n' +
                     '</div></div></form>';
@@ -95,7 +98,7 @@ function renderTask(tasks) {
                         apiCreateOperationForTask(taskId, addedOperationValue).then(
                             function (resp) {
                                 console.log('Odpowiedź z serwera to:', resp.data);
-                                renderOperation(ul, resp.id, status, resp.description, resp.timeSpent);
+                                renderOperation(ul, resp.data.id, 'open', resp.data.description, 0);
                             }
                         )
                     }
@@ -132,6 +135,7 @@ function renderOperation(operationsList, operationId, status, operationDescripti
     spanTime.className = 'badge badge-success badge-pill ml-2';
     const formattedTime = formatTime(timeSpent);
     spanTime.innerText = formattedTime;
+    //debugger;
     divInUl.appendChild(spanTime);
     const divForButttons = document.createElement('div');
     li.appendChild(divForButttons);
@@ -155,8 +159,10 @@ function renderOperation(operationsList, operationId, status, operationDescripti
             timeSpent += 15;
             apiUpdateOperation(operationId, operationDescription, timeSpent).then(
                 function (resp) {
+                    //debugger;
                     console.log(resp);
-                    apiListTasks();
+                    //apiListTasks();
+                    spanTime.innerText = formatTime(timeSpent);
                 }
             )
         }
@@ -166,7 +172,8 @@ function renderOperation(operationsList, operationId, status, operationDescripti
             timeSpent += 60;
             apiUpdateOperation(operationId, operationDescription, timeSpent).then(
                 function (resp) {
-                    apiListTasks();
+                    //apiListTasks();
+                    spanTime.innerText = formatTime(timeSpent);
                 }
             )
         }
@@ -222,8 +229,9 @@ function handleSubmit(e) {
     const description = descriptionIn.value;
     apiCreateTask(title, description).then(
         function (resp) {
-            //console.log('Odpowiedź z serwera to:', resp);
-            apiListTasks();
+            console.log('Odpowiedź z serwera to:', resp);
+            //apiListTasks();
+            renderTask(new Array(resp.data));
         })
 }
 
